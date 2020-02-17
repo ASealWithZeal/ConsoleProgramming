@@ -2,8 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum VariableList
+{
+    None = 0,
+    Bool,
+    Int,
+    Float,
+    Vector2,
+    Vector3,
+    Char,
+    String,
+    GameObject,
+    Transform,
+}
+
+public enum Protection
+{
+    None = 0,
+    Private,
+    Public,
+    Protected
+}
+
 public class CustomInspectorWindowBlock : MonoBehaviour
 {
+    public VariableList type = VariableList.None;
     public bool theBool = false;
     public int theInt = 0;
     public float theFloat = 0.0f;
@@ -13,6 +36,13 @@ public class CustomInspectorWindowBlock : MonoBehaviour
     public string theString = " ";
     public GameObject theObj = null;
     public Transform theTransform = null;
+
+
+    // Other values
+    public Protection protection;
+    public bool minMax = false;
+    public float min = 0.0f;
+    public float max = 0.0f;
 
     // Start is called before the first frame update
     void Start()

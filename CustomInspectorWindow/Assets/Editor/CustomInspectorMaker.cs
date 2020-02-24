@@ -12,6 +12,8 @@ public enum MinMaxType
 public class CustomInspectorMaker : EditorWindow
 {
     List<CustomInspectorWindowBlock> varList = new List<CustomInspectorWindowBlock>();
+    private float space = 20.0f;
+    public float pull = 1.0f;
 
     [MenuItem("Tools/Custom Inspector Maker")]
     public static void ShowWindow()
@@ -23,14 +25,11 @@ public class CustomInspectorMaker : EditorWindow
     void OnGUI()
     {
         //GUILayout.Label("Base Settings", EditorStyles.boldLabel);
-
         for (int i = 0; i < varList.Count; ++i)
         {
             //The rectangle is drawn in the Editor (when MyScript is attached) with the width depending on the value of the Slider
-            EditorGUI.DrawRect(new Rect(2.5f, (2.5f + (85 * i)), Screen.width - 3.5f, 82.5f), Color.white);
-
-            GUILayout.Space(5.0f);
-            //GUILayout.BeginArea(new Rect(100, 10 + (100 * i), position.width, 200));
+            EditorGUI.DrawRect(new Rect(2.5f, (2.5f + (110 * i)), Screen.width - 3.5f, 105.0f), Color.green);
+            GUILayout.Space(space * 0.25f);
             DisplayGeneralData(i);
 
             if (varList[i].type == VariableList.Bool)
@@ -56,7 +55,7 @@ public class CustomInspectorMaker : EditorWindow
 
             else
             {
-                GUILayout.Space(40.0f);
+                GUILayout.Space(space * 2);
             }
 
             if (GUILayout.Button("Destroy This Variable"))
@@ -64,11 +63,18 @@ public class CustomInspectorMaker : EditorWindow
                 varList.Remove(varList[i]);
             }
 
-            GUILayout.Space(2.5f);
+            GUILayout.Space(space * 0.25f);
             //GUILayout.EndArea();
         }
 
-        if (GUILayout.Button("This ButtoN"))
+        GUILayout.FlexibleSpace();
+        if (GUILayout.Button("Create Variable"))
+        {
+            CustomInspectorWindowBlock block = new CustomInspectorWindowBlock();
+            varList.Add(block);
+        }
+
+        if (GUILayout.Button("Export Data"))
         {
             CustomInspectorWindowBlock block = new CustomInspectorWindowBlock();
             varList.Add(block);
@@ -193,6 +199,6 @@ public class CustomInspectorMaker : EditorWindow
         }
 
         else
-            GUILayout.Space(20.0f);
+            GUILayout.Space(space);
     }
 }

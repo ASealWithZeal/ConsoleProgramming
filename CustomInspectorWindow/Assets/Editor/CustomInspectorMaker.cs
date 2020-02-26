@@ -13,7 +13,7 @@ public class CustomInspectorMaker : EditorWindow
 {
     List<CustomInspectorWindowBlock> varList = new List<CustomInspectorWindowBlock>();
     private float space = 20.0f;
-    public float pull = 1.0f;
+    public Vector2 pull = new Vector2();
 
     [MenuItem("Tools/Custom Inspector Maker")]
     public static void ShowWindow()
@@ -77,15 +77,15 @@ public class CustomInspectorMaker : EditorWindow
         if (GUILayout.Button("Export Data"))
         {
             CustomInspectorWindowBlock block = new CustomInspectorWindowBlock();
-            varList.Add(block);
+            ExportData();
         }
     }
 
     private void DisplayGeneralData(int i)
     {
         // Name
-        GUILayout.Label("Variable Name");
-        //varList[i].name = (VariableList)EditorGUILayout.StringField(varList[i].name);
+        GUILayout.Label("Var Name");
+        varList[i].theName = EditorGUILayout.TextField(varList[i].theName);
 
         // Variable type
         EditorGUILayout.BeginHorizontal();
@@ -200,5 +200,35 @@ public class CustomInspectorMaker : EditorWindow
 
         else
             GUILayout.Space(space);
+    }
+
+    private string ExportData()
+    {
+        string s = null;
+        string scriptName = "PLACEHOLDER";
+        s += "[CustomEditor(typeof(" + scriptName + "))]\n";
+        s += "public class " + scriptName + " : Editor\n{\n    SerializedProperty " + scriptName + ";\n\n    private void OnEnable()\n    {\n        " + scriptName + " = serializedObject.FindProperty(" + scriptName + ");\n    }\n\n";
+        s += "    public override void OnInspectorGUI()\n    {\n        "; 
+
+        for (int i = 0; i < varList.Count; ++i)
+        {
+            if (varList[i].type != VariableList.None && varList[i].type != VariableList.String)
+                s += GetFieldString(i);
+        }
+
+        Debug.Log(s);
+        return s;
+    }
+
+    private string GetFieldString(int i)
+    {
+        string s = null;
+
+        if (varList[i].theName != null)
+            s += "        EditorGUILayout." + varList[i].type.ToString() + "Field(\"" + varList[i].theName + "\", " + "PLACEHOLDER" + "." + varList[i].theName + ");";
+        else
+            s += "        EditorGUILayout." + varList[i].type.ToString() + "Field(" + varList[i].theInt + ");";
+
+        return s;
     }
 }

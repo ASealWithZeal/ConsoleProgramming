@@ -27,6 +27,8 @@ public enum Protection
 public class CustomInspectorWindowBlock : MonoBehaviour
 {
     public VariableList type = VariableList.None;
+    public string theName = null;
+
     public bool theBool = false;
     public int theInt = 0;
     public float theFloat = 0.0f;

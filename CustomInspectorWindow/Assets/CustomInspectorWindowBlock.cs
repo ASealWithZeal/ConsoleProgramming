@@ -24,7 +24,7 @@ public enum Protection
     Protected
 }
 
-public class CustomInspectorWindowBlock : MonoBehaviour
+public class CustomInspectorWindowBlock
 {
     public VariableList type = VariableList.None;
     public string theName = null;
@@ -39,6 +39,7 @@ public class CustomInspectorWindowBlock : MonoBehaviour
     public GameObject theObj = null;
     public Transform theTransform = null;
 
+    public bool selected = false;
 
     // Other values
     public Protection protection;

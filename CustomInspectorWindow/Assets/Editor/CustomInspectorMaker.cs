@@ -41,8 +41,11 @@ public class CustomInspectorMaker : EditorWindow
 
         if (GUILayout.Button("Export Data"))
         {
-            ExportEditorData();
-            ExportNormalData();
+            if (CheckCanExportData())
+            {
+                ExportEditorData();
+                ExportNormalData();
+            }
         }
     }
 
@@ -276,6 +279,7 @@ public class CustomInspectorMaker : EditorWindow
     }
     #endregion
 
+    // --------------------------------------------------------------------------------------------------------------------------------------------------
 
     /// <summary>
     /// Region that exports data for the "editor" script
@@ -286,15 +290,16 @@ public class CustomInspectorMaker : EditorWindow
         scriptName = scriptName.Replace(" ", string.Empty);
         string s = null;
         s += s += "using System.Collections;\nusing System.Collections.Generic;\nusing UnityEngine;\nusing UnityEditor;\n\n[CustomEditor(typeof(" + scriptName + "))]\n";
-        s += "public class " + scriptName + "Editor : Editor\n{\n\tSerializedProperty " + scriptName + ";\n\n\tprivate void OnEnable()\n\t{\n\t\t" + scriptName + " = serializedObject.FindProperty(" + scriptName + ");\n\t}\n\n";
-        s += "\tpublic override void OnInspectorGUI()\n\t{\n"; 
+        s += "public class " + scriptName + "Editor : Editor\n{\n\tpublic override void OnInspectorGUI()\n\t{\n\t\t" + scriptName + " Instance = (" + scriptName + ")target;\n"; 
 
         for (int i = 0; i < varList.Count; ++i)
         {
-            if (varList[i].type != VariableList.None && varList[i].type != VariableList.String)
+            if (varList[i].type != VariableList.String && varList[i].type != VariableList.Bool)
                 s += GetNumFieldString(i);
             else if (varList[i].type == VariableList.String)
                 s += GetCharFieldString(i);
+            else if (varList[i].type == VariableList.Bool)
+                s += GetBoolFieldString(i);
         }
 
         s += "\t}\n}";
@@ -317,9 +322,22 @@ public class CustomInspectorMaker : EditorWindow
     private string GetNumFieldString(int i)
     {
         string s = null;
+        string n = varList[i].theName.Replace(" ", string.Empty);
 
-        varList[i].theName = varList[i].theName.Replace(" ", string.Empty);
-        s += "\t\tEditorGUILayout." + varList[i].type.ToString() + "Field(\"" + varList[i].theName + "\", " + scriptName + "." + varList[i].theName + ");\n";
+        // String used for getter/setter functions
+        string val = varList[i].theName[0].ToString().ToUpper();
+        for (int j = 1; j < varList[i].theName.Length; ++j)
+            val += varList[i].theName[j];
+        
+        // Exports text based on whether the variable is public, private/protected, and includes a slider
+        if ((varList[i].protection == Protection.Private || varList[i].protection == Protection.Protected) && !varList[i].minMax)
+            s += "\t\tInstance.Set" + val + "(EditorGUILayout." + varList[i].type.ToString() + "Field(\"" + varList[i].theName + "\", Instance.Get" + val + "()));\n";
+        else if (!varList[i].minMax)
+            s += "\t\tInstance." + n + " = EditorGUILayout." + varList[i].type.ToString() + "Field(\"" + varList[i].theName + "\", Instance." + n + ");\n";
+        else if ((varList[i].protection == Protection.Private || varList[i].protection == Protection.Protected) && varList[i].minMax)
+            s += "\t\tInstance.Set" + val + "((" + varList[i].type.ToString().ToLower() + ")EditorGUILayout.Slider(\"" + varList[i].theName + "\", Instance.Get" + val + "(), " + varList[i].min + "f, " + varList[i].max + "f));\n";
+        else if (varList[i].minMax)
+            s += "\t\tInstance." + n + " = (" + varList[i].type.ToString().ToLower() + ")EditorGUILayout.Slider(\"" + varList[i].theName + "\", Instance." + n + ", " + varList[i].min + "f, " + varList[i].max + "f);\n";
 
         return s;
     }
@@ -327,43 +345,87 @@ public class CustomInspectorMaker : EditorWindow
     private string GetCharFieldString(int i)
     {
         string s = null;
+        string n = varList[i].theName.Replace(" ", string.Empty);
 
-        varList[i].theName = varList[i].theName.Replace(" ", string.Empty);
-        varList[i].theString = varList[i].theString.Replace(" ", string.Empty);
-        s += "\t\tEditorGUILayout.TextField(\"" + varList[i].theName + "\", " + scriptName + "." + varList[i].theName + ");\n";
+        // String used for getter/setter functions
+        string val = varList[i].theName[0].ToString().ToUpper();
+        for (int j = 1; j < varList[i].theName.Length; ++j)
+            val += varList[i].theName[j];
+
+        // Exports text based on whether the variable is public or private/protected
+        if (varList[i].protection == Protection.Private || varList[i].protection == Protection.Protected)
+            s += "\t\tInstance.Set" + val + "(EditorGUILayout.TextField(\"" + varList[i].theName + "\", Instance.Get" + val + "()));\n";
+        else
+            s += "\t\tInstance." + n + " = EditorGUILayout.TextField(\"" + varList[i].theName + "\", Instance." + n + ");\n";
+
+        return s;
+    }
+
+    private string GetBoolFieldString(int i)
+    {
+        string s = null;
+        string n = varList[i].theName.Replace(" ", string.Empty);
+
+        // String used for getter/setter functions
+        string val = varList[i].theName[0].ToString().ToUpper();
+        for (int j = 1; j < varList[i].theName.Length; ++j)
+            val += varList[i].theName[j];
+
+        // Exports text based on whether the variable is public or private/protected
+        if (varList[i].protection == Protection.Private || varList[i].protection == Protection.Protected)
+            s += "\t\tInstance.Set" + val + "(EditorGUILayout.Toggle(\"" + varList[i].theName + "\", Instance.Get" + val + "()));\n";
+        else
+            s += "\t\tInstance." + n + " = EditorGUILayout.Toggle(\"" + varList[i].theName + "\", Instance." + n + ");\n";
 
         return s;
     }
     #endregion
 
+    // --------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Region that exports data for the "normal" script, if applicable
+    /// </summary>
+    #region
+    /// <summary>
+    /// Exports a "normal" script containing the below information
+    /// </summary>
     private void ExportNormalData()
     {
         scriptName = scriptName.Replace(" ", string.Empty);
         string s = null;
         s += "using System.Collections;\nusing System.Collections.Generic;\nusing UnityEngine;\n\n";
-        s += "public class " + scriptName + " : MonoBehaviour\n{\n\t";
+        s += "public class " + scriptName + " : MonoBehaviour\n{\n";
         
+        // Goes through each variable one-by-one
         for (int i = 0; i < varList.Count; ++i)
         {
-            if (varList[i].protection > 0 && varList[i].type > 0 && varList[i].theName != null)
-            {
-                if (varList[i].minMax)
-                    s += "[Range(" + varList[i].min + ", " + varList[i].max + ")]\n\t";
-                s += varList[i].protection.ToString().ToLower() + " " + varList[i].type.ToString().ToLower() + " " + varList[i].theName.Replace(" ", string.Empty) + " = " + varList[i].GetTypeValue() + "; ";
-                if (varList[i].protection == Protection.Private || varList[i].protection == Protection.Protected)
-                {
-                    s += "public " + varList[i].type.ToString().ToLower() + " Get" + varList[i].theName.Replace(" ", string.Empty) + "() { return " + varList[i].theName.Replace(" ", string.Empty) + "; } ";
-                    s += "public void Set" + varList[i].theName.Replace(" ", string.Empty) + "(" + varList[i].type.ToString().ToLower() + " val) { " + varList[i].theName.Replace(" ", string.Empty) + " = " + "val; }";
-                }
-                s += "\n\t";
-            }
+            // Checks if the type needs to be made lowercase (int, float, etc.) or left alone (Vector2, Transform, etc.)
+            string t = varList[i].type.ToString();
+            if (varList[i].type != VariableList.Vector2 && varList[i].type != VariableList.Vector3)
+                t = t.ToLower();
 
-            else
-                Debug.LogError("Missing information in variable " + i + "!");
+            // Outputs the basic variable information
+            if (varList[i].minMax)
+                s += "\t[Range(" + varList[i].min + ", " + varList[i].max + ")]\n";
+            s += "\t" + varList[i].protection.ToString().ToLower() + " " + t + " " + varList[i].theName.Replace(" ", string.Empty) + " = " + varList[i].GetTypeValue() + "; ";
+
+            // If the variable is Private or Protected, add a getter and a setter
+            if (varList[i].protection == Protection.Private || varList[i].protection == Protection.Protected)
+            {
+                string varFunctionName = varList[i].theName[0].ToString().ToUpper();
+                for (int j = 1; j < varList[i].theName.Length; ++j)
+                    varFunctionName += varList[i].theName[j];
+
+                s += "public " + t + " Get" + varFunctionName.Replace(" ", string.Empty) + "() { return " + varList[i].theName.Replace(" ", string.Empty) + "; } ";
+                s += "public void Set" + varFunctionName.Replace(" ", string.Empty) + "(" + t + " val) { " + varList[i].theName.Replace(" ", string.Empty) + " = " + "val; }";
+            }
+            s += "\n";
         }
 
-        s += "\n}";
+        s += "}";
 
+        // Outputs the file, if possible
         string path = scriptName + ".txt";
 
         if (File.Exists(path))
@@ -377,5 +439,46 @@ public class CustomInspectorMaker : EditorWindow
 
         //Print the text from the file
         Debug.Log(s);
+    }
+    #endregion
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Goes through every variable in each variable to ensure they are filled before exporting any data
+    /// </summary>
+    private bool CheckCanExportData()
+    {
+        bool @bool = true;
+
+        if (scriptName == null)
+        {
+            Debug.LogError("Script name not set!");
+            @bool = false;
+        }
+
+        for (int i = 0; i < varList.Count; ++i)
+        {
+            string s = null;
+            if (varList[i].theName == null)
+                s += "Name of variable " + i + " not set!\n";
+
+            if (varList[i].type == 0)
+                s += "Type of variable " + i + " not set!\n";
+
+            if (varList[i].protection == 0)
+                s += "Protection level of variable " + i + " not set!\n";
+
+            if (varList[i].GetTypeValue() == null)
+                s += "Type of variable " + i + " not set!\n";
+
+            if (s != null)
+            {
+                Debug.LogError("Variable " + i + "Errors:\n" + s);
+                @bool = false;
+            }
+        }
+
+        return @bool;
     }
 }

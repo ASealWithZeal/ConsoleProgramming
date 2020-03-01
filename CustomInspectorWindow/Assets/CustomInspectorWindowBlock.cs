@@ -75,7 +75,7 @@ public class CustomInspectorWindowBlock
                 s = theInt.ToString();
                 break;
             case VariableList.String:
-                s = theString;
+                s = "\"" + theString + "\"";
                 break;
             case VariableList.Vector2:
                 s = "new Vector2(" + theVec2.x + "f, " + theVec2.y + "f)";

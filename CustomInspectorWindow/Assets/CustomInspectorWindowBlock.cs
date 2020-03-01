@@ -10,10 +10,10 @@ public enum VariableList
     Float,
     Vector2,
     Vector3,
-    Char,
+    //Char,
     String,
-    GameObject,
-    Transform,
+    //GameObject,
+    //Transform,
 }
 
 public enum Protection
@@ -57,5 +57,34 @@ public class CustomInspectorWindowBlock
     void Update()
     {
         
+    }
+
+    public string GetTypeValue()
+    {
+        string s = null;
+
+        switch (type)
+        {
+            case VariableList.Bool:
+                s = theBool.ToString().ToLower();
+                break;
+            case VariableList.Float:
+                s = theFloat.ToString() + "f";
+                break;
+            case VariableList.Int:
+                s = theInt.ToString();
+                break;
+            case VariableList.String:
+                s = theString;
+                break;
+            case VariableList.Vector2:
+                s = "new Vector2(" + theVec2.x + "f, " + theVec2.y + "f)";
+                break;
+            case VariableList.Vector3:
+                s = "new Vector3(" + theVec3.x + "f, " + theVec3.y + "f, " + theVec3.z + "f)";
+                break;
+        }
+
+        return s;
     }
 }

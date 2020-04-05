@@ -147,13 +147,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 125421490}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47eb5addfc04aad4a87a3eabe0d2e11d, type: 3}
+  m_Script: {fileID: 11500000, guid: 68f489b49bc8d644bbfc8474b24f0769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  theString: The String
-  theFloat: -5
-  theBool: 1
-  theVec2: {x: 3, y: 6}
+  a: 0
+  BroBprice: 1
 --- !u!4 &125421492
 Transform:
   m_ObjectHideFlags: 0

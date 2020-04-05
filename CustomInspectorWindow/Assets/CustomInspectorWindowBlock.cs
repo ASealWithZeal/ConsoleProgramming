@@ -29,6 +29,11 @@ public class CustomInspectorWindowBlock
     public VariableList type = VariableList.None;
     public string theName = null;
 
+    // Childed values
+    public CustomInspectorWindowBlock parent = null;
+    public int childIncrements = 0;
+
+    // Variable values
     public bool theBool = false;
     public int theInt = 0;
     public float theFloat = 0.0f;

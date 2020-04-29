@@ -147,11 +147,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 125421490}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68f489b49bc8d644bbfc8474b24f0769, type: 3}
+  m_Script: {fileID: 11500000, guid: 2e0e94e2b3ae97b4cb46e6000348c183, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  a: 0
-  BroBprice: 1
+  a: 1111
+  b: 1
+  c: 49
+  d: -0.48
+  e: -0.73
+  f: 75
 --- !u!4 &125421492
 Transform:
   m_ObjectHideFlags: 0

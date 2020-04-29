@@ -24,6 +24,28 @@ public enum Protection
     Protected
 }
 
+public enum BoolConditions
+{
+    True = 0,
+    False
+}
+
+public enum NumConditions
+{
+    EqualTo = 0,
+    GreaterThan,
+    GreaterThanOrEqualTo,
+    LessThan,
+    LessThanOrEqualTo,
+    Between
+}
+
+public enum OtherConditions
+{
+    Is = 0,
+    IsNot
+}
+
 public class CustomInspectorWindowBlock
 {
     public VariableList type = VariableList.None;
@@ -31,7 +53,19 @@ public class CustomInspectorWindowBlock
 
     // Childed values
     public CustomInspectorWindowBlock parent = null;
+    public List<CustomInspectorWindowBlock> children = new List<CustomInspectorWindowBlock>();
     public int childIncrements = 0;
+
+    // Conditional values
+    public BoolConditions boolCondition = BoolConditions.True;
+    public bool checkedBool = true;
+    public NumConditions numConditions = NumConditions.EqualTo;
+    public float leftNum = 0;
+    public float rightNum = 0;
+    public OtherConditions otherConditions = OtherConditions.Is;
+    public Vector2 checkedVec2 = new Vector2();
+    public Vector3 checkedVec3 = new Vector3();
+    public string checkedString = "";
 
     // Variable values
     public bool theBool = false;
@@ -52,18 +86,6 @@ public class CustomInspectorWindowBlock
     public float min = 0.0f;
     public float max = 0.0f;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public string GetTypeValue()
     {
         string s = null;
@@ -80,6 +102,7 @@ public class CustomInspectorWindowBlock
                 s = theInt.ToString();
                 break;
             case VariableList.String:
+                theString = UpdateString();
                 s = "\"" + theString + "\"";
                 break;
             case VariableList.Vector2:
@@ -91,5 +114,23 @@ public class CustomInspectorWindowBlock
         }
 
         return s;
+    }
+
+    // Updates the string if it includes " or '
+    private string UpdateString()
+    {
+        List<char> s = new List<char>();
+
+        for (int i = 0; i < theString.Length; ++i)
+        {
+            if ((theString[i] == '\"' || theString[i] == '\'') && ((i > 0 && theString[i - 1] != '\\') || (i == 0)))
+                s.Add('\\');
+            s.Add(theString[i]);
+        }
+
+        string holder = "";
+        for (int i = 0; i < s.Count; ++i)
+            holder += s[i];
+        return holder;
     }
 }
